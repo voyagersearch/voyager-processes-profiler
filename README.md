@@ -85,15 +85,22 @@ npm run bblocks:refresh # re-mirror OSC bblock sources into src/bblocks/mirror
 
 The mirrored OSC bblock sources live in [src/bblocks/mirror/](src/bblocks/mirror/). `npm run bblocks:refresh` re-fetches them and rewrites `manifest.json` with the current SHAs; if the fetched shape drifts from what our runtime code depends on, `tests/bblock-conformance.spec.ts` fails and we update D120 to match.
 
-## Federation with D110 register
+## D110 Register (JSON-LD)
 
-See [docs/D110-INTEGRATION.md](docs/D110-INTEGRATION.md) for how D120 process URLs wire into Voyager's OSPD Definitions Register contribution.
+The 13-row register is published from this repo as JSON-LD conforming to OSC's [`ogc.model.registered-item.activity-type`](https://github.com/ogcincubator/registered-item-model/tree/master/_sources/activity-type) profile (ISO 19135:2026 shape). Pull it directly:
 
 ```bash
-npm run register:jsonld -- --file rows.json --out register.jsonld
+curl -sS https://raw.githubusercontent.com/voyagersearch/voyager-processes-profiler/dev/docs/register/voyager-geoprocessing-activities.jsonld > voyager-register.jsonld
 ```
 
-Produces a self-contained JSON-LD dump of the register — ready for Nick's LD-client testing or direct import into the OSC-side register. Example input shape in [docs/examples/register-rows.example.json](docs/examples/register-rows.example.json).
+Regenerate + SHACL-validate locally:
+
+```bash
+npm run register:jsonld -- --file docs/examples/voyager-register-rows.json --out docs/register/voyager-geoprocessing-activities.jsonld
+npm run register:validate     # requires pyshacl (pipx install pyshacl)
+```
+
+Details: [docs/D110-INTEGRATION.md](docs/D110-INTEGRATION.md).
 
 ## Deploy
 
