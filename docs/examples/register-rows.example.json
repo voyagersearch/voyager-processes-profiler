@@ -1,0 +1,24 @@
+[
+  {
+    "id": "GA037",
+    "label": "Retrieve",
+    "term": "retrieve",
+    "description": "Hybrid/lexical search over indexed content, returning candidate documents.",
+    "isDefinedBy": "https://api.voyagersearch.com/ospd/register/activities/retrieve"
+  },
+  {
+    "id": "GA038",
+    "label": "Rank",
+    "term": "rank",
+    "description": "Reranks a candidate set by relevance, top-K cut.",
+    "isDefinedBy": "https://api.voyagersearch.com/ospd/register/activities/rank"
+  },
+  {
+    "id": "GA039",
+    "label": "Generate",
+    "term": "generate",
+    "description": "LLM answer synthesis over retrieved context.",
+    "isDefinedBy": "https://api.voyagersearch.com/ospd/register/activities/generate",
+    "processUrl": "https://api.voyagersearch.com/ospd/processes/generate"
+  }
+]
