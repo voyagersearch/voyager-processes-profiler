@@ -2,6 +2,8 @@
 
 Standalone HTTP jacket that exposes Voyager's D100 activity chain as OGC API-Processes 1.0 endpoints conforming to the OSC IPT (Integrity, Provenance, Trust) profile. **OSPD D120 deliverable.**
 
+> **Coming back to this project after a few weeks?** Start with [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — architecture + terminology cheatsheet covering bblocks, PROV, D100/D110/D120, URI namespaces, and the runtime map on the demo EC2.
+
 ## Why standalone
 
 D120 needs to ship on OSPD's timeline, which does not wait for Voyager 26.2 / 27.1 / 27.2 product releases. This service runs beside `voyager-mastra-full-rag` on the demo EC2, calls the same MCP tools the RAG demo already uses, and emits PROV sidecars into HQ via the same `sink.ts` pattern.
