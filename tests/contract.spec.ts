@@ -24,6 +24,7 @@ const cfg: Config = {
     provConcurrency: 1,
   },
   rag: { baseUrl: "" },
+  rank: { apiUrl: "", apiKey: "", model: "rerank-english-v3.0" },
   toggleOverride: "",
 };
 
@@ -93,11 +94,14 @@ describe("wrapWithProvenance (inline mode)", () => {
     );
     if ("error" in req) throw new Error("unexpected " + req.error);
 
-    const wrapped = wrapWithProvenance({ answer: "yes" }, req, {
+    const { outputs: wrapped, stored, endedAt } = wrapWithProvenance({ answer: "yes" }, req, {
       mode: "inline",
       publicBaseUrl: cfg.publicBaseUrl,
     });
     expect(wrapped.answer).toBe("yes");
+    expect(stored.activity_id).toBe("urn:client:run:2");
+    expect(stored.process_id).toBe("generate");
+    expect(typeof endedAt).toBe("string");
     const prov = wrapped.provenance as Record<string, unknown>;
     expect(prov["@type"]).toBe("prov:Activity");
     expect(prov["@id"]).toBe("urn:client:run:2");
@@ -124,7 +128,7 @@ describe("wrapWithProvenance (reference mode)", () => {
     );
     if ("error" in req) throw new Error("unexpected " + req.error);
 
-    const wrapped = wrapWithProvenance({ ranked: [] }, req, {
+    const { outputs: wrapped } = wrapWithProvenance({ ranked: [] }, req, {
       mode: "reference",
       publicBaseUrl: cfg.publicBaseUrl,
     });
@@ -144,7 +148,7 @@ describe("wrapWithProvenance (reference mode)", () => {
     );
     if ("error" in req) throw new Error("unexpected " + req.error);
 
-    const wrapped = wrapWithProvenance({ candidates: [] }, req, {
+    const { outputs: wrapped } = wrapWithProvenance({ candidates: [] }, req, {
       mode: "reference",
       publicBaseUrl: cfg.publicBaseUrl,
     });
