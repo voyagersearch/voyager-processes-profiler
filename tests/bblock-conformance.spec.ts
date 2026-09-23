@@ -48,6 +48,26 @@ describe("bblocks mirror manifest", () => {
   });
 });
 
+describe("workflow bblock (ogc.osc.api-profiles.processes.workflow)", () => {
+  const wf = readJson<{
+    itemClass: string;
+    dependsOn: string[];
+  }>("workflow.bblock.json");
+
+  it("still declares itemClass=api", () => {
+    expect(wf.itemClass).toBe("api");
+  });
+
+  it("still depends on ipt.api + application-package (composite baseline)", () => {
+    // The workflow profile composes on top of the IPT profile + application-package
+    // (CWL). The v0.2 workflow process description is CWL-shape informational
+    // only — a supplied-CWL executor is v0.3. If dependsOn changes upstream we
+    // need to revisit that assumption.
+    expect(wf.dependsOn).toContain("ogc.osc.api-profiles.processes.ipt.api");
+    expect(wf.dependsOn).toContain("ogc.osc.application-package");
+  });
+});
+
 describe("ipt/api bblock (ogc.osc.api-profiles.processes.ipt.api)", () => {
   const api = readJson<{
     name: string;

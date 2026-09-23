@@ -9,6 +9,7 @@ import {
 import { rankHandler, rankProcessMeta } from "./rank.js";
 import { retrieveHandler, retrieveProcessMeta } from "./retrieve.js";
 import { listEnabledIds } from "./toggle.js";
+import { workflowHandler, workflowProcessMeta } from "./workflow.js";
 
 export interface ProcessMeta {
   id: string;
@@ -24,17 +25,19 @@ export type ProcessHandler = (
   cfg: Config
 ) => Promise<Record<string, unknown>>;
 
-// v0.1 processes (real execute strategy)
+// v0.1 processes (real execute strategy) + v0.2 Phase 4 workflow composite
 const REAL_META: Record<string, ProcessMeta> = {
   retrieve: retrieveProcessMeta,
   rank: rankProcessMeta,
   generate: generateProcessMeta,
+  "rag-workflow": workflowProcessMeta,
 };
 
 const REAL_HANDLERS: Record<string, ProcessHandler> = {
   retrieve: retrieveHandler,
   rank: rankHandler,
   generate: generateHandler,
+  "rag-workflow": workflowHandler,
 };
 
 // v0.2 Phase 3 · playback-strategy processes covering the rest of the D100

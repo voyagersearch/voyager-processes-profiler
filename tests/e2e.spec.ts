@@ -49,7 +49,7 @@ describe("HTTP surface", () => {
     ).toBe(true);
   });
 
-  it("GET /processes lists the enabled processes (3 real + 10 playback = 13)", async () => {
+  it("GET /processes lists all enabled processes (3 real + 10 playback + 1 workflow = 14)", async () => {
     const res = await makeApp().fetch(new Request("http://localhost/processes"));
     expect(res.status).toBe(200);
     const body = (await res.json()) as { processes: Array<{ id: string }> };
@@ -67,6 +67,7 @@ describe("HTTP surface", () => {
         "geotag",
         "nlp-extract-entities",
         "ocr",
+        "rag-workflow",
         "rank",
         "retrieve",
       ].sort()
