@@ -83,6 +83,16 @@ npm run bblocks:refresh # re-mirror OSC bblock sources into src/bblocks/mirror
 
 The mirrored OSC bblock sources live in [src/bblocks/mirror/](src/bblocks/mirror/). `npm run bblocks:refresh` re-fetches them and rewrites `manifest.json` with the current SHAs; if the fetched shape drifts from what our runtime code depends on, `tests/bblock-conformance.spec.ts` fails and we update D120 to match.
 
+## Federation with D110 register
+
+See [docs/D110-INTEGRATION.md](docs/D110-INTEGRATION.md) for how D120 process URLs wire into Voyager's OSPD Definitions Register contribution.
+
+```bash
+npm run register:jsonld -- --file rows.json --out register.jsonld
+```
+
+Produces a self-contained JSON-LD dump of the register — ready for Nick's LD-client testing or direct import into the OSC-side register. Example input shape in [docs/examples/register-rows.example.json](docs/examples/register-rows.example.json).
+
 ## Deploy
 
 ```bash
