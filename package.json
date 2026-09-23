@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "bblocks:refresh": "node scripts/refresh-bblocks.mjs",
-    "register:jsonld": "node scripts/generate-register-jsonld.mjs"
+    "register:jsonld": "node scripts/generate-register-jsonld.mjs",
+    "register:validate": "node scripts/validate-register-shacl.mjs"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.0",

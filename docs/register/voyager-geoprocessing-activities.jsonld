@@ -23,56 +23,12 @@
         "@id": "http://ospd/demo/agents/voyager-search",
         "rdfs:label": "Voyager Search"
       },
-      "rim:itemClass": {
-        "@id": "acttype:activityTypeItemClass"
-      },
-      "rim:register_manager": {
+      "rim:registerManager": {
         "@id": "http://ospd/demo/agents/voyager-search"
       },
-      "rim:register_owner": {
+      "rim:registerOwner": {
         "@id": "http://ospd/demo/agents/voyager-search"
-      },
-      "rim:hasItem": [
-        {
-          "@id": "http://ospd/demo/fas-source-fetch"
-        },
-        {
-          "@id": "http://ospd/demo/fas-code-decode"
-        },
-        {
-          "@id": "http://ospd/demo/fas-geolocate"
-        },
-        {
-          "@id": "http://ospd/demo/nlp-extract-entities"
-        },
-        {
-          "@id": "http://ospd/demo/geotag"
-        },
-        {
-          "@id": "http://ospd/demo/classify-commodity"
-        },
-        {
-          "@id": "http://ospd/demo/classify-region"
-        },
-        {
-          "@id": "http://ospd/demo/field-normalize"
-        },
-        {
-          "@id": "http://ospd/demo/retrieve"
-        },
-        {
-          "@id": "http://ospd/demo/generate"
-        },
-        {
-          "@id": "http://ospd/demo/data-acquisition"
-        },
-        {
-          "@id": "http://ospd/demo/text-metadata-enrichment"
-        },
-        {
-          "@id": "http://ospd/demo/retrieval-augmented-generation"
-        }
-      ]
+      }
     },
     {
       "@id": "http://ospd/demo/fas-source-fetch",

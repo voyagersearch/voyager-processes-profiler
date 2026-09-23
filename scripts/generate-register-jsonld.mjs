@@ -151,7 +151,12 @@ function buildRegisterItem(row, index) {
   return item;
 }
 
-function buildRegister(rows) {
+function buildRegister(_rows) {
+  // Note: rim:itemClass is a property of items, NOT the register itself
+  // (SHACL enforces this — any resource carrying rim:itemClass acttype:
+  // activityTypeItemClass must be an acttype:ActivityType). Membership is
+  // expressed by items pointing at the register via rim:inRegister; the
+  // core ontology has no rim:hasItem inverse.
   return {
     "@id": REGISTER_URI,
     "@type": "rim:Register",
@@ -159,10 +164,8 @@ function buildRegister(rows) {
     "dct:description": REGISTER_DESCRIPTION,
     "dct:issued": new Date().toISOString().slice(0, 10),
     "dct:creator": { "@id": CUSTODIAN_URI, "rdfs:label": "Voyager Search" },
-    "rim:itemClass": { "@id": "acttype:activityTypeItemClass" },
-    "rim:register_manager": { "@id": CUSTODIAN_URI },
-    "rim:register_owner": { "@id": CUSTODIAN_URI },
-    "rim:hasItem": rows.map((r) => ({ "@id": r.isDefinedBy })),
+    "rim:registerManager": { "@id": CUSTODIAN_URI },
+    "rim:registerOwner": { "@id": CUSTODIAN_URI },
   };
 }
 

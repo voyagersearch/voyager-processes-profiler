@@ -1,5 +1,6 @@
 node_modules/
 dist/
+scripts/.shacl-cache/
 *.log
 .env
 .env.local
