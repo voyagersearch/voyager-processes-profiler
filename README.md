@@ -75,7 +75,7 @@ The response envelope includes an inline `outputs.provenance` block conforming t
 ```bash
 npm install
 cp .env.example .env    # then edit HQ_* + RAG_BASE_URL
-npm run dev             # http://localhost:4600
+npm run dev             # http://localhost:4601
 npm run check           # type-check
 npm test                # vitest
 npm run bblocks:refresh # re-mirror OSC bblock sources into src/bblocks/mirror
@@ -95,13 +95,31 @@ Produces a self-contained JSON-LD dump of the register — ready for Nick's LD-c
 
 ## Deploy
 
+Requires `voyager-prov-ts` checked out as a sibling directory (`../voyager-prov-ts`) — the file: dep in package.json expects it. The Dockerfile builds it via an `additional_contexts:prov` named-context, so no npm publish is needed.
+
+### Standalone (HQ + RAG reachable via host networking)
+
 ```bash
 cp deploy/processes.env.example deploy/processes.env
-# edit deploy/processes.env
-docker compose -f deploy/docker-compose.yml up -d
+# edit deploy/processes.env (set HQ_PASSWORD, PUBLIC_BASE_URL, RAG_BASE_URL)
+docker compose -f deploy/docker-compose.yml up -d --build
 ```
 
-Runs on port 4600 to sit beside the RAG service on 4500. Both share the demo HQ on 4000.
+Publishes port 4601 on the host.
+
+### Demo EC2 (rag-demo stack already running)
+
+The RAG service on the demo box does NOT publish 4500 on the host — it runs on the `voyager-rag-demo_default` docker network under alias `rag`. Use the demo compose which joins that network:
+
+```bash
+cp deploy/processes.env.example deploy/processes.env
+# edit deploy/processes.env — leave RAG_BASE_URL=http://rag:4500 (default)
+docker compose -f deploy/docker-compose.demo.yml --env-file deploy/processes.env up -d --build
+```
+
+Publishes port 4601 on the host + joins the rag-demo network for `rag:4500`.
+
+HQ remains on the docker host, reached via `host.docker.internal:4000` in both modes.
 
 ## Related repos
 

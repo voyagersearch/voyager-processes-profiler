@@ -1,6 +1,6 @@
 {
   "name": "voyager-processes-profiler",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Standalone OGC API-Processes 1.0 IPT-profile-conformant HTTP jacket over Voyager's activity chain. OSPD D120 deliverable.",
   "type": "module",

@@ -1,13 +1,24 @@
+# Standalone compose. Suitable when D120 runs on its own and HQ + the RAG
+# service are reachable from the container via host.docker.internal.
+#
+# Requires Docker Compose v2.17+ (BuildKit named build contexts).
+#
+# For the demo EC2 (where the RAG service does NOT publish 4500 on the host
+# but runs on the voyager-rag-demo_default network under alias `rag`), use
+# docker-compose.demo.yml instead.
+
 services:
   processes:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: voyager-processes-profiler:0.1.0
+      additional_contexts:
+        prov: ../../voyager-prov-ts
+    image: voyager-processes-profiler:0.2.0
     container_name: voyager-processes-profiler
     restart: unless-stopped
     ports:
-      - "4600:4600"
+      - "4601:4601"
     env_file:
       - ./processes.env
     extra_hosts:
