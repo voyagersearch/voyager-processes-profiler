@@ -32,7 +32,16 @@ Later product bake-in happens through `src/processes/toggle.ts` — the on/off-p
 
 Every execution ALSO emits a PROV sidecar into HQ (via `src/prov/sidecar-writer.ts`) — one JSON file under `{HQ_PROV_FILE_ROOT}/{HQ_PROV_SUBPATH}/{shard}/{uuid}.json` picked up by the PROV Records folder repo (`r1a02cbdfdbe`) into Solr `main`. This is how D110 register lookups become able to find D120-emitted runs.
 
-The other 9 activities in the D100 12-type enum (`embed`, `extract`, `answer`, `geotag`, `classify-commodity`, `classify-region`, `nlp-extract-entities`, `ocr`, `field-normalize`) plumb through the same handler shape; landing in v0.2 Phase 3.
+### Playback processes (v0.2 Phase 3 — covering the rest of the D100 12-type enum)
+
+The 10 activity types that don't have callable standalone execution paths in HQ today all ship as **playback** processes: `POST /processes/{id}/execution` with a `subject` (doc id, entity URI, or activity URI) queries Solr `main` for existing PROV records matching that activity type + subject and returns them as if D120 had just executed. Response envelope carries `strategy: "playback"` so callers know it's a historical lookup, not a live run.
+
+| Layer | Process ids |
+| ----- | ----------- |
+| Layer 2 (RAG ingest) | `connect`, `extract`, `chunk`, `embed` |
+| Layer 1 (FAS enrichment / CFP §5.1 geospatial ops) | `geotag`, `classify-commodity`, `classify-region`, `nlp-extract-entities`, `ocr`, `field-normalize` |
+
+Real-execute promotion for these is a v0.3 concern (requires new HQ pathways for pipeline-step-per-doc invocation).
 
 ## IPT profile (bblock: `ogc.osc.api-profiles.processes.ipt.api`)
 

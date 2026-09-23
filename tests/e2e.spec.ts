@@ -49,12 +49,28 @@ describe("HTTP surface", () => {
     ).toBe(true);
   });
 
-  it("GET /processes lists the enabled processes", async () => {
+  it("GET /processes lists the enabled processes (3 real + 10 playback = 13)", async () => {
     const res = await makeApp().fetch(new Request("http://localhost/processes"));
     expect(res.status).toBe(200);
     const body = (await res.json()) as { processes: Array<{ id: string }> };
     const ids = body.processes.map((p) => p.id).sort();
-    expect(ids).toEqual(["generate", "rank", "retrieve"]);
+    expect(ids).toEqual(
+      [
+        "chunk",
+        "classify-commodity",
+        "classify-region",
+        "connect",
+        "embed",
+        "extract",
+        "field-normalize",
+        "generate",
+        "geotag",
+        "nlp-extract-entities",
+        "ocr",
+        "rank",
+        "retrieve",
+      ].sort()
+    );
   });
 
   it("GET /processes/{id} returns a process description with self + execute links", async () => {
@@ -75,6 +91,22 @@ describe("HTTP surface", () => {
   it("GET /processes/nope returns 404", async () => {
     const res = await makeApp().fetch(new Request("http://localhost/processes/nope"));
     expect(res.status).toBe(404);
+  });
+
+  it("GET /processes/geotag returns a playback-strategy description", async () => {
+    const res = await makeApp().fetch(new Request("http://localhost/processes/geotag"));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      id: string;
+      description: string;
+      inputs: Record<string, unknown>;
+      outputs: Record<string, unknown>;
+    };
+    expect(body.id).toBe("geotag");
+    expect(body.description).toMatch(/PLAYBACK/);
+    expect(body.inputs.subject).toBeDefined();
+    expect(body.outputs.hits).toBeDefined();
+    expect(body.outputs.strategy).toBeDefined();
   });
 });
 
