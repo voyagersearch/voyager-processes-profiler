@@ -2,6 +2,7 @@
   "retrieve": { "maturity": "beta", "enabled": true, "iptCompliance": "permissive" },
   "rank": { "maturity": "beta", "enabled": true, "iptCompliance": "permissive" },
   "generate": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
+  "rag-workflow": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
 
   "connect": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
   "extract": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },

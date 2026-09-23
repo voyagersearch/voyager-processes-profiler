@@ -11,6 +11,7 @@ conformanceRoute.get("/", (c) => {
       "http://www.opengis.net/spec/ogcapi-processes-1/1.0/conf/oas30",
       "https://www.opengis.net/spec/ogcapi-processes-1/1.0/conf/callback",
       "https://ogcincubator.github.io/bblocks-openscience/bblock/ogc.osc.api-profiles.processes.ipt.api",
+      "https://ogcincubator.github.io/bblocks-openscience/bblock/ogc.osc.api-profiles.processes.workflow",
     ],
   });
 });
