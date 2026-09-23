@@ -22,15 +22,17 @@ Later product bake-in happens through `src/processes/toggle.ts` — the on/off-p
 | GET  | `/openapi` | OpenAPI 3.1 spec (YAML by default; JSON on `Accept: application/json`) |
 | GET  | `/prov/activity/{uuid}` | The full `prov:Activity` block referenced by `?provenance=reference` responses |
 
-## First-cut process catalog (v0.1)
+## Process catalog (v0.2)
 
-| id | Backing call | Activity type emitted |
-| -- | ------------ | --------------------- |
-| `retrieve` | HQ `POST /api/search/{collection}` | `retrieve` |
-| `rank`     | Local reranker stub                | `rank` |
-| `generate` | RAG service `POST /ask?prov=true`  | `generate` (+ chain via prov-sink) |
+| id | Backing call | Notes |
+| -- | ------------ | ----- |
+| `retrieve` | HQ `POST /api/search/{collection}` | Lexical / hybrid over indexed content |
+| `rank`     | HTTP rerank (Cohere-shape) → score-sort fallback | Real cross-encoder wire-up per `RANK_API_URL`; falls back to score-descending sort when unset |
+| `generate` | RAG service `POST /ask?prov=true`  | Full 27-activity chain surfaces in `prov_chain` output |
 
-The other 9 activities in the D100 12-type enum (`embed`, `extract`, `answer`, `geotag`, `classify-commodity`, `classify-region`, `nlp-extract-entities`, `ocr`, `field-normalize`) plumb through the same handler shape; add them in v0.2.
+Every execution ALSO emits a PROV sidecar into HQ (via `src/prov/sidecar-writer.ts`) — one JSON file under `{HQ_PROV_FILE_ROOT}/{HQ_PROV_SUBPATH}/{shard}/{uuid}.json` picked up by the PROV Records folder repo (`r1a02cbdfdbe`) into Solr `main`. This is how D110 register lookups become able to find D120-emitted runs.
+
+The other 9 activities in the D100 12-type enum (`embed`, `extract`, `answer`, `geotag`, `classify-commodity`, `classify-region`, `nlp-extract-entities`, `ocr`, `field-normalize`) plumb through the same handler shape; landing in v0.2 Phase 3.
 
 ## IPT profile (bblock: `ogc.osc.api-profiles.processes.ipt.api`)
 

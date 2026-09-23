@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import type { Config } from "../config.js";
 import type { ProcessToggle } from "../processes/toggle.js";
-import { saveProvActivity } from "./store.js";
+import { saveProvActivity, type StoredProvActivity } from "./store.js";
 
 export type ProvenanceMode = "inline" | "reference";
 
@@ -100,11 +100,20 @@ export function normaliseIptRequest(
  * prov-entity or prov-activity — the reference form is a prov-activity with
  * only its stable IRI populated, which the OGC pattern permits.
  */
+export interface WrapResult {
+  /** Handler outputs augmented with the IPT-required provenance field. */
+  outputs: Record<string, unknown>;
+  /** The full PROV activity record just stored (needed for sidecar emission). */
+  stored: StoredProvActivity;
+  /** endedAtTime used when the block was minted. */
+  endedAt: string;
+}
+
 export function wrapWithProvenance(
   outputs: Record<string, unknown>,
   req: NormalisedIptRequest,
   opts: { mode: ProvenanceMode; publicBaseUrl: string }
-): Record<string, unknown> {
+): WrapResult {
   const endedAt = new Date().toISOString();
   const uuid = randomUUID();
   const block: Record<string, unknown> = {
@@ -118,7 +127,7 @@ export function wrapWithProvenance(
     "prov:generated": { "@id": req.result_id },
   };
 
-  saveProvActivity({
+  const stored: StoredProvActivity = {
     uuid,
     activity_id: req.activity_id,
     agent_id: req.agent_id,
@@ -126,20 +135,22 @@ export function wrapWithProvenance(
     process_id: req.process_id,
     block,
     created_at: endedAt,
-  });
+  };
+  saveProvActivity(stored);
 
-  if (opts.mode === "reference") {
-    return {
-      ...outputs,
-      provenance: {
-        "@context": "https://www.w3.org/ns/prov",
-        "@type": "prov:Activity",
-        "@id": req.activity_id,
-        href: `${opts.publicBaseUrl}/prov/activity/${uuid}`,
-        rel: "http://www.opengis.net/def/rel/ogc/1.0/provenance",
-      },
-    };
-  }
+  const wrapped =
+    opts.mode === "reference"
+      ? {
+          ...outputs,
+          provenance: {
+            "@context": "https://www.w3.org/ns/prov",
+            "@type": "prov:Activity",
+            "@id": req.activity_id,
+            href: `${opts.publicBaseUrl}/prov/activity/${uuid}`,
+            rel: "http://www.opengis.net/def/rel/ogc/1.0/provenance",
+          },
+        }
+      : { ...outputs, provenance: block };
 
-  return { ...outputs, provenance: block };
+  return { outputs: wrapped, stored, endedAt };
 }
