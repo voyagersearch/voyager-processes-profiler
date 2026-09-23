@@ -8,6 +8,7 @@ import {
   wrapWithProvenance,
   type ProvenanceMode,
 } from "../prov/emit.js";
+import { emitSidecarInBackground } from "../prov/sidecar-writer.js";
 import { createJob, storeJobResult } from "./jobs.js";
 
 function parseProvenanceMode(raw: string | undefined): ProvenanceMode {
@@ -57,11 +58,12 @@ executionRoute.post("/:id/execution", async (c) => {
     (async () => {
       try {
         const outputs = await handler(normalised, cfg);
-        const wrapped = wrapWithProvenance(outputs, normalised, {
+        const wrap = wrapWithProvenance(outputs, normalised, {
           mode: provMode,
           publicBaseUrl: cfg.publicBaseUrl,
         });
-        storeJobResult(job.jobID, { status: "successful", outputs: wrapped });
+        emitSidecarInBackground(cfg, normalised, wrap.stored, wrap.endedAt);
+        storeJobResult(job.jobID, { status: "successful", outputs: wrap.outputs });
       } catch (err) {
         storeJobResult(job.jobID, {
           status: "failed",
@@ -74,11 +76,12 @@ executionRoute.post("/:id/execution", async (c) => {
 
   try {
     const outputs = await handler(normalised, cfg);
-    const wrapped = wrapWithProvenance(outputs, normalised, {
+    const wrap = wrapWithProvenance(outputs, normalised, {
       mode: provMode,
       publicBaseUrl: cfg.publicBaseUrl,
     });
-    return c.json({ outputs: wrapped }, 200);
+    emitSidecarInBackground(cfg, normalised, wrap.stored, wrap.endedAt);
+    return c.json({ outputs: wrap.outputs }, 200);
   } catch (err) {
     return c.json(
       {

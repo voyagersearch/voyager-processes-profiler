@@ -13,6 +13,11 @@ export interface Config {
   rag: {
     baseUrl: string;
   };
+  rank: {
+    apiUrl: string;
+    apiKey: string;
+    model: string;
+  };
   toggleOverride: string;
 }
 
@@ -31,6 +36,11 @@ export function readConfig(): Config {
     },
     rag: {
       baseUrl: (process.env.RAG_BASE_URL ?? "").replace(/\/+$/, ""),
+    },
+    rank: {
+      apiUrl: (process.env.RANK_API_URL ?? "").replace(/\/+$/, ""),
+      apiKey: process.env.RANK_API_KEY ?? "",
+      model: process.env.RANK_MODEL ?? "rerank-english-v3.0",
     },
     toggleOverride: process.env.PROCESSES_TOGGLE_OVERRIDE ?? "",
   };
