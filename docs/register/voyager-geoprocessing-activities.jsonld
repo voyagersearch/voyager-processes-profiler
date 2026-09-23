@@ -1,0 +1,730 @@
+{
+  "@context": {
+    "@vocab": "https://voyagersearch.com/ns/ospd/",
+    "voy": "https://voyagersearch.com/ns/ospd/",
+    "rim": "https://w3id.org/ogc/rim/",
+    "acttype": "https://w3id.org/ogc/rim/activity-type/",
+    "prov": "http://www.w3.org/ns/prov#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "dct": "http://purl.org/dc/terms/",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "ogcapi": "http://www.opengis.net/def/ogcapi/"
+  },
+  "@graph": [
+    {
+      "@id": "http://ospd/demo/register/voyager-geoprocessing-activities",
+      "@type": "rim:Register",
+      "dct:title": "Voyager Geoprocessing Activities (OSPD Demo)",
+      "dct:description": "Voyager Search's contribution to the OSPD Definitions Register: the 13 activity types (10 pipeline steps + 3 umbrella categories) emitted by the Voyager RAG chain and HQ-side FAS enrichment pipelines, published as a profile of the OSC Registered Item Model.",
+      "dct:issued": "2026-09-23",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:register_manager": {
+        "@id": "http://ospd/demo/agents/voyager-search"
+      },
+      "rim:register_owner": {
+        "@id": "http://ospd/demo/agents/voyager-search"
+      },
+      "rim:hasItem": [
+        {
+          "@id": "http://ospd/demo/fas-source-fetch"
+        },
+        {
+          "@id": "http://ospd/demo/fas-code-decode"
+        },
+        {
+          "@id": "http://ospd/demo/fas-geolocate"
+        },
+        {
+          "@id": "http://ospd/demo/nlp-extract-entities"
+        },
+        {
+          "@id": "http://ospd/demo/geotag"
+        },
+        {
+          "@id": "http://ospd/demo/classify-commodity"
+        },
+        {
+          "@id": "http://ospd/demo/classify-region"
+        },
+        {
+          "@id": "http://ospd/demo/field-normalize"
+        },
+        {
+          "@id": "http://ospd/demo/retrieve"
+        },
+        {
+          "@id": "http://ospd/demo/generate"
+        },
+        {
+          "@id": "http://ospd/demo/data-acquisition"
+        },
+        {
+          "@id": "http://ospd/demo/text-metadata-enrichment"
+        },
+        {
+          "@id": "http://ospd/demo/retrieval-augmented-generation"
+        }
+      ]
+    },
+    {
+      "@id": "http://ospd/demo/fas-source-fetch",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "http://ospd/demo/data-acquisition"
+      },
+      "rdfs:label": "FAS Source Fetch",
+      "dct:title": "FAS Source Fetch",
+      "dct:description": "External catalog API pull. Retrieves source records from an authoritative external endpoint via a Voyager HQ Python connector, generating raw source records as the connector-chain start.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/fas-source-fetch",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA037",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/fas-code-decode"
+        },
+        {
+          "@id": "http://ospd/demo/fas-geolocate"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)",
+      "voy:hasProcessProfile": {
+        "@id": "https://api.voyagersearch.com/ospd/processes/fas-source-fetch",
+        "@type": "ogcapi:Process"
+      }
+    },
+    {
+      "@id": "http://ospd/demo/fas-code-decode",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "http://ospd/demo/data-acquisition"
+      },
+      "rdfs:label": "FAS Code Decode",
+      "dct:title": "FAS Code Decode",
+      "dct:description": "Numeric-code → human-readable-string lookup against a compiled taxonomy. Turns FAS unit IDs, attribute IDs, and ISO country codes into descriptive fields.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/fas-code-decode",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA038",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/fas-source-fetch"
+        },
+        {
+          "@id": "http://ospd/demo/fas-geolocate"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)",
+      "voy:hasProcessProfile": {
+        "@id": "https://api.voyagersearch.com/ospd/processes/fas-code-decode",
+        "@type": "ogcapi:Process"
+      }
+    },
+    {
+      "@id": "http://ospd/demo/fas-geolocate",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "http://ospd/demo/data-acquisition"
+      },
+      "rdfs:label": "FAS Geolocate",
+      "dct:title": "FAS Geolocate",
+      "dct:description": "Country / place-name → GeoJSON geometry lookup via a gazetteer service. Terminal step of the connector chain; produces the indexed-doc entity that bridges to the pipeline chain.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/fas-geolocate",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA039",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/fas-source-fetch"
+        },
+        {
+          "@id": "http://ospd/demo/fas-code-decode"
+        },
+        {
+          "@id": "http://ospd/demo/geotag"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)",
+      "voy:hasProcessProfile": {
+        "@id": "https://api.voyagersearch.com/ospd/processes/fas-geolocate",
+        "@type": "ogcapi:Process"
+      }
+    },
+    {
+      "@id": "http://ospd/demo/nlp-extract-entities",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "http://ospd/demo/text-metadata-enrichment"
+      },
+      "rdfs:label": "NLP Entity Extraction",
+      "dct:title": "NLP Entity Extraction",
+      "dct:description": "Named-entity recognition over document text. Emits structured entity mentions (persons, organizations, places, events, products). Semantically upstream of Geotag.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/nlp-extract-entities",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA040",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/geotag"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)",
+      "voy:hasProcessProfile": {
+        "@id": "https://api.voyagersearch.com/ospd/processes/nlp-extract-entities",
+        "@type": "ogcapi:Process"
+      }
+    },
+    {
+      "@id": "http://ospd/demo/geotag",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "http://ospd/demo/text-metadata-enrichment"
+      },
+      "rdfs:label": "Geotag",
+      "dct:title": "Geotag",
+      "dct:description": "Place-name mention → coordinate lookup. Consumes the place mentions produced by NLP Entity Extraction and resolves each against an external gazetteer. Produces spatial features from text-derived input, complementing pixel-derived geometry ops.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/geotag",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA041",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/nlp-extract-entities"
+        },
+        {
+          "@id": "http://ospd/demo/fas-geolocate"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)",
+      "voy:hasProcessProfile": {
+        "@id": "https://api.voyagersearch.com/ospd/processes/geotag",
+        "@type": "ogcapi:Process"
+      }
+    },
+    {
+      "@id": "http://ospd/demo/classify-commodity",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "http://ospd/demo/text-metadata-enrichment"
+      },
+      "rdfs:label": "Commodity Classification",
+      "dct:title": "Commodity Classification",
+      "dct:description": "Text → commodity-taxonomy classifier (dictionary matcher over normalized labels). Domain-specific to agricultural / commodity data.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/classify-commodity",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA042",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/classify-region"
+        },
+        {
+          "@id": "http://ospd/demo/field-normalize"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)",
+      "voy:hasProcessProfile": {
+        "@id": "https://api.voyagersearch.com/ospd/processes/classify-commodity",
+        "@type": "ogcapi:Process"
+      }
+    },
+    {
+      "@id": "http://ospd/demo/classify-region",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "http://ospd/demo/text-metadata-enrichment"
+      },
+      "rdfs:label": "Region Classification",
+      "dct:title": "Region Classification",
+      "dct:description": "Text → region-taxonomy classifier. Emitted in the pipeline for canonical region classification and cross-repository tagging.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/classify-region",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA043",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/classify-commodity"
+        },
+        {
+          "@id": "http://ospd/demo/geotag"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)",
+      "voy:hasProcessProfile": {
+        "@id": "https://api.voyagersearch.com/ospd/processes/classify-region",
+        "@type": "ogcapi:Process"
+      }
+    },
+    {
+      "@id": "http://ospd/demo/field-normalize",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "http://ospd/demo/text-metadata-enrichment"
+      },
+      "rdfs:label": "Field Normalization",
+      "dct:title": "Field Normalization",
+      "dct:description": "Field concatenation / normalization to a common schema across heterogeneous inputs. Produces uniform fields for downstream indexing and retrieval.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/field-normalize",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA044",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/classify-commodity"
+        },
+        {
+          "@id": "http://ospd/demo/classify-region"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)",
+      "voy:hasProcessProfile": {
+        "@id": "https://api.voyagersearch.com/ospd/processes/field-normalize",
+        "@type": "ogcapi:Process"
+      }
+    },
+    {
+      "@id": "http://ospd/demo/retrieve",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "http://ospd/demo/retrieval-augmented-generation"
+      },
+      "rdfs:label": "Retrieve",
+      "dct:title": "Retrieve",
+      "dct:description": "Hybrid Solr search over the enriched index (semantic + lexical). Emitted by the mastra voyager-search tool as the first activity of a Retrieval-Augmented Generation cycle.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/retrieve",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA045",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/generate"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)",
+      "voy:hasProcessProfile": {
+        "@id": "https://api.voyagersearch.com/ospd/processes/retrieve",
+        "@type": "ogcapi:Process"
+      }
+    },
+    {
+      "@id": "http://ospd/demo/generate",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "http://ospd/demo/retrieval-augmented-generation"
+      },
+      "rdfs:label": "Generate",
+      "dct:title": "Generate",
+      "dct:description": "LLM answer synthesis over retrieved chunks. Terminal step of a Retrieval-Augmented Generation workflow; produces the natural-language answer plus a PROV bundle citation trail.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/generate",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA046",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/retrieve"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)",
+      "voy:hasProcessProfile": {
+        "@id": "https://api.voyagersearch.com/ospd/processes/generate",
+        "@type": "ogcapi:Process"
+      }
+    },
+    {
+      "@id": "http://ospd/demo/data-acquisition",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "prov:Activity"
+      },
+      "rdfs:label": "Data Acquisition",
+      "dct:title": "Data Acquisition",
+      "dct:description": "Umbrella Geoprocessing Activity type for connector-side operations that pull, decode, and geolocate external source records into an indexing pipeline. Groups FAS Source Fetch, FAS Code Decode, FAS Geolocate.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/data-acquisition",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA047",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/text-metadata-enrichment"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)"
+    },
+    {
+      "@id": "http://ospd/demo/text-metadata-enrichment",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "prov:Activity"
+      },
+      "rdfs:label": "Text Metadata Enrichment",
+      "dct:title": "Text Metadata Enrichment",
+      "dct:description": "Umbrella Geoprocessing Activity type for pipeline-side operations that extract, classify, geotag, and normalize document metadata for downstream discovery. Groups NLP Entity Extraction, Geotag, Commodity Classification, Region Classification, Field Normalization.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/text-metadata-enrichment",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA048",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/data-acquisition"
+        },
+        {
+          "@id": "http://ospd/demo/retrieval-augmented-generation"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)"
+    },
+    {
+      "@id": "http://ospd/demo/retrieval-augmented-generation",
+      "@type": [
+        "acttype:ActivityType",
+        "owl:Class"
+      ],
+      "rdfs:subClassOf": {
+        "@id": "prov:Activity"
+      },
+      "rdfs:label": "Retrieval-Augmented Generation",
+      "dct:title": "Retrieval-Augmented Generation",
+      "dct:description": "Umbrella Geoprocessing Activity type for RAG-layer operations that retrieve indexed content and synthesize answers using an LLM, producing PROV-traceable outputs. Groups Retrieve, Generate.",
+      "rim:inRegister": {
+        "@id": "http://ospd/demo/register/voyager-geoprocessing-activities"
+      },
+      "rim:itemClass": {
+        "@id": "acttype:activityTypeItemClass"
+      },
+      "rim:objectIdentifier": {
+        "@value": "http://ospd/demo/retrieval-augmented-generation",
+        "@type": "xsd:anyURI"
+      },
+      "rim:validityStatus": {
+        "@id": "rim:valid"
+      },
+      "rim:publicationStatus": {
+        "@id": "rim:published"
+      },
+      "skos:notation": "GA049",
+      "skos:related": [
+        {
+          "@id": "http://ospd/demo/text-metadata-enrichment"
+        }
+      ],
+      "dct:source": {
+        "@id": "https://github.com/voyagersearch/voyager-prov-ts/blob/dev/docs/ospd-register-proposal.md"
+      },
+      "dct:isPartOf": "demo:enrichment-geoacs (proposed sub-register)",
+      "owl:versionInfo": "v1",
+      "dct:creator": {
+        "@id": "http://ospd/demo/agents/voyager-search",
+        "rdfs:label": "Voyager Search"
+      },
+      "dct:contributor": "Alex Bostic (abostic@voyagersearch.com)"
+    }
+  ]
+}
