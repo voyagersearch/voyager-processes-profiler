@@ -16,9 +16,11 @@ Later product bake-in happens through `src/processes/toggle.ts` — the on/off-p
 | GET  | `/conformance` | Conformance classes |
 | GET  | `/processes` | List of enabled processes |
 | GET  | `/processes/{id}` | Process description |
-| POST | `/processes/{id}/execution` | Execute (IPT profile: `activity_id` required) |
+| POST | `/processes/{id}/execution` | Execute (IPT profile: `activity_id` required). Query `?provenance=reference` returns a link to the PROV block instead of inlining it. |
 | GET  | `/jobs/{jobId}` | Job status |
 | GET  | `/jobs/{jobId}/results` | Job results |
+| GET  | `/openapi` | OpenAPI 3.1 spec (YAML by default; JSON on `Accept: application/json`) |
+| GET  | `/prov/activity/{uuid}` | The full `prov:Activity` block referenced by `?provenance=reference` responses |
 
 ## First-cut process catalog (v0.1)
 
@@ -55,7 +57,10 @@ cp .env.example .env    # then edit HQ_* + RAG_BASE_URL
 npm run dev             # http://localhost:4600
 npm run check           # type-check
 npm test                # vitest
+npm run bblocks:refresh # re-mirror OSC bblock sources into src/bblocks/mirror
 ```
+
+The mirrored OSC bblock sources live in [src/bblocks/mirror/](src/bblocks/mirror/). `npm run bblocks:refresh` re-fetches them and rewrites `manifest.json` with the current SHAs; if the fetched shape drifts from what our runtime code depends on, `tests/bblock-conformance.spec.ts` fails and we update D120 to match.
 
 ## Deploy
 
