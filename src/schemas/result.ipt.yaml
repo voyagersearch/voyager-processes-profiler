@@ -1,0 +1,12 @@
+# Local mirror of the OSC IPT result-value constraint.
+#
+# Source of truth:
+#   https://raw.githubusercontent.com/ogcincubator/bblocks-openscience/master/_sources/api-profiles/processes/ipt/results/schema.yaml
+
+allOf:
+  - $ref: bblocks://ogc.api.processes.v1.schemas.qualifiedInputValue
+properties:
+  value:
+    oneOf:
+      - $ref: bblocks://ogc.ogc-utils.prov-entity
+      - $ref: bblocks://ogc.ogc-utils.prov-activity

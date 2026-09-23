@@ -1,0 +1,17 @@
+{
+  "retrieve": {
+    "maturity": "beta",
+    "enabled": true,
+    "iptCompliance": "permissive"
+  },
+  "rank": {
+    "maturity": "draft",
+    "enabled": true,
+    "iptCompliance": "permissive"
+  },
+  "generate": {
+    "maturity": "draft",
+    "enabled": true,
+    "iptCompliance": "permissive"
+  }
+}

@@ -1,0 +1,15 @@
+services:
+  processes:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: voyager-processes-profiler:0.1.0
+    container_name: voyager-processes-profiler
+    restart: unless-stopped
+    ports:
+      - "4600:4600"
+    env_file:
+      - ./processes.env
+    extra_hosts:
+      # Reach the docker host on Linux, matching voyager-mastra-full-rag pattern.
+      - "host.docker.internal:host-gateway"

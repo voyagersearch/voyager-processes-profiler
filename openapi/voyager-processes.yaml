@@ -1,0 +1,196 @@
+openapi: 3.1.0
+info:
+  title: Voyager Processes Profiler
+  description: |-
+    OGC API - Processes 1.0 with the OSC IPT (Integrity, Provenance, Trust)
+    profile applied. Wraps Voyager's D100 activity chain (retrieve / rank /
+    generate at v0.1) as executable processes. OSPD D120.
+  version: 0.1.0
+  contact:
+    name: Voyager Search
+    email: abostic@voyagersearch.com
+  license:
+    name: Apache License, Version 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+
+servers:
+  - url: https://api.voyagersearch.com/ospd
+    description: Voyager OSPD production
+  - url: http://localhost:4600
+    description: Local dev
+
+paths:
+  /:
+    $ref: "bblocks://ogc.api.processes.v1.paths.LandingPage"
+
+  /conformance:
+    $ref: "bblocks://ogc.api.processes.v1.paths.Conformance"
+
+  /processes:
+    $ref: "bblocks://ogc.api.processes.v1.paths.ProcessList"
+
+  /processes/retrieve:
+    get:
+      summary: Get retrieve process description
+      operationId: getRetrieveProcess
+      tags: [Processes]
+      responses:
+        '200':
+          description: retrieve process description
+          content:
+            application/json:
+              schema:
+                $ref: "bblocks://ogc.api.processes.v1.schemas.process"
+
+  /processes/retrieve/execution:
+    post:
+      summary: Execute retrieve (IPT profile)
+      operationId: executeRetrieve
+      tags: [Execution]
+      parameters:
+        - name: Prefer
+          in: header
+          required: false
+          schema:
+            type: string
+            enum: [respond-async, wait=10, wait=30]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IptExecuteRequest"
+            example:
+              activity_id: "urn:client:run:2026-09-22T22:15:00Z:query-42"
+              agent_id: "https://voyagersearch.com/agents/rag-retriever/v1"
+              result_id: "urn:client:result:2026-09-22T22:15:00Z:query-42"
+              inputs:
+                query: "wildfire risk models for California"
+                top_k: 20
+                collection: "main"
+                profile: "hybrid"
+      responses:
+        '200':
+          description: Sync execution completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IptExecuteResponse"
+        '201':
+          $ref: "bblocks://ogc.api.processes.v1.responses.ExecuteAsync"
+
+  /processes/rank:
+    get:
+      summary: Get rank process description
+      operationId: getRankProcess
+      tags: [Processes]
+      responses:
+        '200':
+          description: rank process description
+          content:
+            application/json:
+              schema:
+                $ref: "bblocks://ogc.api.processes.v1.schemas.process"
+
+  /processes/rank/execution:
+    post:
+      summary: Execute rank (IPT profile)
+      operationId: executeRank
+      tags: [Execution]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IptExecuteRequest"
+      responses:
+        '200':
+          description: Sync execution completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IptExecuteResponse"
+
+  /processes/generate:
+    get:
+      summary: Get generate process description
+      operationId: getGenerateProcess
+      tags: [Processes]
+      responses:
+        '200':
+          description: generate process description
+          content:
+            application/json:
+              schema:
+                $ref: "bblocks://ogc.api.processes.v1.schemas.process"
+
+  /processes/generate/execution:
+    post:
+      summary: Execute generate (IPT profile)
+      operationId: executeGenerate
+      tags: [Execution]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IptExecuteRequest"
+      responses:
+        '200':
+          description: Sync execution completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IptExecuteResponse"
+
+  /jobs:
+    $ref: "bblocks://ogc.api.processes.v1.paths.JobList"
+
+  /jobs/{jobId}:
+    $ref: "bblocks://ogc.api.processes.v1.api#paths/~1jobs~1{jobId}"
+
+  /jobs/{jobId}/results:
+    get:
+      summary: retrieve the result(s) of a job
+      operationId: getResult
+      tags: [Result]
+      parameters:
+        - $ref: "bblocks://ogc.api.processes.v1.parameters.jobId"
+      responses:
+        '200':
+          description: Job results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IptExecuteResponse"
+
+components:
+  schemas:
+    IptExecuteRequest:
+      allOf:
+        - $ref: "bblocks://ogc.api.processes.v1.schemas.execute"
+      properties:
+        activity_id:
+          type: string
+          description: Client-nominated IRI or CURIE for the prov:Activity
+        result_id:
+          type: string
+          description: Client-nominated IRI or CURIE for the prov:Entity result
+        agent_id:
+          type: string
+          description: Client-nominated IRI or CURIE for the prov:Agent
+      required: [activity_id]
+
+    IptExecuteResponse:
+      type: object
+      properties:
+        outputs:
+          type: object
+          description: Process outputs
+          additionalProperties: true
+          properties:
+            provenance:
+              type: object
+              description: >-
+                Inline prov:Activity or prov:Entity per the IPT results
+                bblock — echoes activity_id / agent_id / result_id.

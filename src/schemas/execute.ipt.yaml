@@ -1,0 +1,22 @@
+# Local mirror of the OSC IPT execute-request constraint. Composed on top of
+# ogc.api.processes.v1.schemas.execute at spec-render time. This copy is what
+# the contract test validates responses against — kept in-repo so the tests
+# do not depend on live GitHub availability.
+#
+# Source of truth:
+#   https://raw.githubusercontent.com/ogcincubator/bblocks-openscience/master/_sources/api-profiles/processes/ipt/execute/schema.yaml
+
+allOf:
+  - $ref: bblocks://ogc.api.processes.v1.schemas.execute
+properties:
+  activity_id:
+    $ref: bblocks://ogc.ogc-utils.iri-or-curie
+    description: Client-nominated IRI or CURIE for the prov:Activity representing this run.
+  result_id:
+    $ref: bblocks://ogc.ogc-utils.iri-or-curie
+    description: Client-nominated IRI or CURIE for the prov:Entity representing the result.
+  agent_id:
+    $ref: bblocks://ogc.ogc-utils.iri-or-curie
+    description: Client-nominated IRI or CURIE for the prov:Agent (Process Service).
+required:
+  - activity_id
