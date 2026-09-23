@@ -7,6 +7,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 
 import { normaliseIptRequest, wrapWithProvenance } from "../src/prov/emit.js";
+import { _resetProvStoreForTests, getProvActivity } from "../src/prov/store.js";
 import type { Config } from "../src/config.js";
 import type { ProcessToggle } from "../src/processes/toggle.js";
 
@@ -32,6 +33,7 @@ const strict: ProcessToggle = { maturity: "stable", enabled: true, iptCompliance
 describe("IPT execute normalisation", () => {
   beforeEach(() => {
     process.env.PROCESSES_TOGGLE_OVERRIDE = "";
+    _resetProvStoreForTests();
   });
 
   it("strict mode rejects requests missing activity_id", () => {
@@ -74,7 +76,9 @@ describe("IPT execute normalisation", () => {
   });
 });
 
-describe("wrapWithProvenance", () => {
+describe("wrapWithProvenance (inline mode)", () => {
+  beforeEach(() => _resetProvStoreForTests());
+
   it("wraps outputs with an inline prov:Activity block echoing the IPT IRIs", () => {
     const req = normaliseIptRequest(
       {
@@ -89,7 +93,10 @@ describe("wrapWithProvenance", () => {
     );
     if ("error" in req) throw new Error("unexpected " + req.error);
 
-    const wrapped = wrapWithProvenance({ answer: "yes" }, req);
+    const wrapped = wrapWithProvenance({ answer: "yes" }, req, {
+      mode: "inline",
+      publicBaseUrl: cfg.publicBaseUrl,
+    });
     expect(wrapped.answer).toBe("yes");
     const prov = wrapped.provenance as Record<string, unknown>;
     expect(prov["@type"]).toBe("prov:Activity");
@@ -99,5 +106,53 @@ describe("wrapWithProvenance", () => {
       "urn:client:agent:2"
     );
     expect((prov["prov:generated"] as Record<string, unknown>)["@id"]).toBe("urn:client:result:2");
+  });
+});
+
+describe("wrapWithProvenance (reference mode)", () => {
+  beforeEach(() => _resetProvStoreForTests());
+
+  it("returns an @id + href pointing at /prov/activity/{uuid} instead of inlining", () => {
+    const req = normaliseIptRequest(
+      {
+        activity_id: "urn:client:run:3",
+        inputs: {},
+      },
+      "rank",
+      cfg,
+      permissive
+    );
+    if ("error" in req) throw new Error("unexpected " + req.error);
+
+    const wrapped = wrapWithProvenance({ ranked: [] }, req, {
+      mode: "reference",
+      publicBaseUrl: cfg.publicBaseUrl,
+    });
+    const prov = wrapped.provenance as Record<string, unknown>;
+    expect(prov["@id"]).toBe("urn:client:run:3");
+    expect(typeof prov.href).toBe("string");
+    expect(prov.href).toMatch(/^http:\/\/localhost:4600\/prov\/activity\/[0-9a-f-]+$/);
+    expect(prov["prov:startedAtTime"]).toBeUndefined(); // no timing details in reference form
+  });
+
+  it("stores the full prov:Activity in the store so /prov/activity/{uuid} can resolve it", () => {
+    const req = normaliseIptRequest(
+      { activity_id: "urn:client:run:4", inputs: {} },
+      "retrieve",
+      cfg,
+      permissive
+    );
+    if ("error" in req) throw new Error("unexpected " + req.error);
+
+    const wrapped = wrapWithProvenance({ candidates: [] }, req, {
+      mode: "reference",
+      publicBaseUrl: cfg.publicBaseUrl,
+    });
+    const href = (wrapped.provenance as Record<string, string>).href;
+    const uuid = href.split("/").pop() as string;
+    const stored = getProvActivity(uuid);
+    expect(stored).not.toBeNull();
+    expect(stored?.activity_id).toBe("urn:client:run:4");
+    expect((stored?.block["@type"] as string)).toBe("prov:Activity");
   });
 });

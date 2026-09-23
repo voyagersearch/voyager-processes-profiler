@@ -3,14 +3,23 @@ import { Hono } from "hono";
 import { readConfig } from "../config.js";
 import { getHandler, getProcessDescription } from "../processes/registry.js";
 import { getToggle } from "../processes/toggle.js";
-import { normaliseIptRequest, wrapWithProvenance } from "../prov/emit.js";
+import {
+  normaliseIptRequest,
+  wrapWithProvenance,
+  type ProvenanceMode,
+} from "../prov/emit.js";
 import { createJob, storeJobResult } from "./jobs.js";
+
+function parseProvenanceMode(raw: string | undefined): ProvenanceMode {
+  return raw === "reference" ? "reference" : "inline";
+}
 
 export const executionRoute = new Hono();
 
 executionRoute.post("/:id/execution", async (c) => {
   const cfg = readConfig();
   const id = c.req.param("id");
+  const provMode = parseProvenanceMode(c.req.query("provenance"));
 
   const desc = getProcessDescription(id, cfg);
   if (!desc) {
@@ -48,7 +57,10 @@ executionRoute.post("/:id/execution", async (c) => {
     (async () => {
       try {
         const outputs = await handler(normalised, cfg);
-        const wrapped = wrapWithProvenance(outputs, normalised);
+        const wrapped = wrapWithProvenance(outputs, normalised, {
+          mode: provMode,
+          publicBaseUrl: cfg.publicBaseUrl,
+        });
         storeJobResult(job.jobID, { status: "successful", outputs: wrapped });
       } catch (err) {
         storeJobResult(job.jobID, {
@@ -62,7 +74,10 @@ executionRoute.post("/:id/execution", async (c) => {
 
   try {
     const outputs = await handler(normalised, cfg);
-    const wrapped = wrapWithProvenance(outputs, normalised);
+    const wrapped = wrapWithProvenance(outputs, normalised, {
+      mode: provMode,
+      publicBaseUrl: cfg.publicBaseUrl,
+    });
     return c.json({ outputs: wrapped }, 200);
   } catch (err) {
     return c.json(

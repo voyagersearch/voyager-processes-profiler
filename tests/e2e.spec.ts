@@ -1,7 +1,6 @@
 /**
  * End-to-end HTTP smoke over the Hono app. Uses `app.fetch(req)` directly so
- * no port needs to be bound and no HQ/RAG service has to be reachable — the
- * retrieve process is stubbed by monkey-patching hqSearch in a companion test.
+ * no port needs to be bound and no HQ/RAG service has to be reachable.
  *
  * The full retrieve→HQ round-trip is exercised manually via curl once the
  * service is deployed (see README).
@@ -13,12 +12,17 @@ import { Hono } from "hono";
 import { landingRoute } from "../src/routes/landing.js";
 import { conformanceRoute } from "../src/routes/conformance.js";
 import { processesRoute } from "../src/routes/processes.js";
+import { openapiRoute } from "../src/routes/openapi.js";
+import { provRoute } from "../src/routes/prov.js";
+import { _resetProvStoreForTests, saveProvActivity } from "../src/prov/store.js";
 
 function makeApp(): Hono {
   const app = new Hono();
   app.route("/", landingRoute);
   app.route("/conformance", conformanceRoute);
   app.route("/processes", processesRoute);
+  app.route("/openapi", openapiRoute);
+  app.route("/prov", provRoute);
   return app;
 }
 
@@ -30,6 +34,7 @@ describe("HTTP surface", () => {
     const rels = body.links.map((l) => l.rel);
     expect(rels).toContain("conformance");
     expect(rels).toContain("processes");
+    expect(rels).toContain("service-desc");
   });
 
   it("GET /conformance advertises the IPT bblock", async () => {
@@ -70,5 +75,52 @@ describe("HTTP surface", () => {
   it("GET /processes/nope returns 404", async () => {
     const res = await makeApp().fetch(new Request("http://localhost/processes/nope"));
     expect(res.status).toBe(404);
+  });
+});
+
+describe("OpenAPI route", () => {
+  it("GET /openapi returns YAML by default", async () => {
+    const res = await makeApp().fetch(new Request("http://localhost/openapi"));
+    expect(res.status).toBe(200);
+    const ctype = res.headers.get("content-type") ?? "";
+    expect(ctype).toContain("application/vnd.oai.openapi");
+    const text = await res.text();
+    expect(text).toMatch(/^openapi:\s*3\.1\.0/m);
+  });
+
+  it("GET /openapi with Accept: application/json returns parsed JSON", async () => {
+    const res = await makeApp().fetch(
+      new Request("http://localhost/openapi", { headers: { Accept: "application/json" } })
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { openapi: string; info: { title: string } };
+    expect(body.openapi).toBe("3.1.0");
+    expect(body.info.title).toMatch(/Voyager Processes Profiler/);
+  });
+});
+
+describe("PROV activity route", () => {
+  it("GET /prov/activity/{unknown} returns 404", async () => {
+    _resetProvStoreForTests();
+    const res = await makeApp().fetch(new Request("http://localhost/prov/activity/nope"));
+    expect(res.status).toBe(404);
+  });
+
+  it("GET /prov/activity/{uuid} returns the stored block when present", async () => {
+    _resetProvStoreForTests();
+    saveProvActivity({
+      uuid: "abc-123",
+      activity_id: "urn:x",
+      agent_id: "urn:a",
+      result_id: "urn:r",
+      process_id: "retrieve",
+      block: { "@type": "prov:Activity", "@id": "urn:x" },
+      created_at: new Date().toISOString(),
+    });
+    const res = await makeApp().fetch(new Request("http://localhost/prov/activity/abc-123"));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Record<string, unknown>;
+    expect(body["@type"]).toBe("prov:Activity");
+    expect(body["@id"]).toBe("urn:x");
   });
 });

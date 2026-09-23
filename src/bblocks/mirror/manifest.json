@@ -1,0 +1,55 @@
+{
+  "repo": "ogcincubator/bblocks-openscience",
+  "ref": "master",
+  "fetched_at": "2026-09-23T04:07:26.085Z",
+  "files": [
+    {
+      "source_path": "_sources/api-profiles/processes/ipt/api/bblock.json",
+      "mirror_name": "ipt-api.bblock.json",
+      "sha": "74e2a64e92c73f148c26ae6bc63310a0631556b4",
+      "size": 729
+    },
+    {
+      "source_path": "_sources/api-profiles/processes/ipt/api/description.md",
+      "mirror_name": "ipt-api.description.md",
+      "sha": "c7eb895c67047a959d58f23e952030bddb15191b",
+      "size": 583
+    },
+    {
+      "source_path": "_sources/api-profiles/processes/ipt/execute/bblock.json",
+      "mirror_name": "ipt-execute.bblock.json",
+      "sha": "3b8f75b2bac6f6a01a63656a4cc084d0064b4b9c",
+      "size": 302
+    },
+    {
+      "source_path": "_sources/api-profiles/processes/ipt/execute/schema.yaml",
+      "mirror_name": "ipt-execute.schema.yaml",
+      "sha": "f95247a6b497824a7f06064d5a1b38362e0c9b1f",
+      "size": 309
+    },
+    {
+      "source_path": "_sources/api-profiles/processes/ipt/results/bblock.json",
+      "mirror_name": "ipt-results.bblock.json",
+      "sha": "19d481eae4914525ff49864b4d478c2bd11a2267",
+      "size": 366
+    },
+    {
+      "source_path": "_sources/api-profiles/processes/ipt/results/schema.yaml",
+      "mirror_name": "ipt-results.schema.yaml",
+      "sha": "7644b81ddb2461ef29015cf46f7675ab1334de0c",
+      "size": 393
+    },
+    {
+      "source_path": "_sources/api-profiles/processes/workflow/bblock.json",
+      "mirror_name": "workflow.bblock.json",
+      "sha": "3aa3c0023d6317e3e839df459669ff59e95cb623",
+      "size": 652
+    },
+    {
+      "source_path": "_sources/api-profiles/processes/ospd/bblock.json",
+      "mirror_name": "ospd.bblock.json",
+      "sha": "49dc6587c2fa8d44b9e161cac79aee1f30a52175",
+      "size": 912
+    }
+  ]
+}
