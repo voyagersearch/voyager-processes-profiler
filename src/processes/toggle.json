@@ -1,17 +1,17 @@
 {
-  "retrieve": {
-    "maturity": "beta",
-    "enabled": true,
-    "iptCompliance": "permissive"
-  },
-  "rank": {
-    "maturity": "draft",
-    "enabled": true,
-    "iptCompliance": "permissive"
-  },
-  "generate": {
-    "maturity": "draft",
-    "enabled": true,
-    "iptCompliance": "permissive"
-  }
+  "retrieve": { "maturity": "beta", "enabled": true, "iptCompliance": "permissive" },
+  "rank": { "maturity": "beta", "enabled": true, "iptCompliance": "permissive" },
+  "generate": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
+
+  "connect": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
+  "extract": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
+  "chunk": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
+  "embed": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
+
+  "geotag": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
+  "classify-commodity": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
+  "classify-region": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
+  "nlp-extract-entities": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
+  "ocr": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" },
+  "field-normalize": { "maturity": "draft", "enabled": true, "iptCompliance": "permissive" }
 }
