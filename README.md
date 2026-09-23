@@ -43,6 +43,16 @@ The 10 activity types that don't have callable standalone execution paths in HQ 
 
 Real-execute promotion for these is a v0.3 concern (requires new HQ pathways for pipeline-step-per-doc invocation).
 
+### Composite workflow (v0.2 Phase 4)
+
+The `rag-workflow` process conforms to the OSC workflow bblock (`ogc.osc.api-profiles.processes.workflow`) at the descriptor level: it declares retrieve → rank → generate as a CWL-shape step listing. Execution walks the internal handler chain — each sub-step emits its own PROV sidecar, and `outputs.chain_provenance` names the child activity IRIs. A supplied-CWL runtime lands in v0.3.
+
+```bash
+curl -X POST $PUBLIC_BASE_URL/processes/rag-workflow/execution \
+  -H 'Content-Type: application/json' \
+  -d '{"activity_id":"urn:demo:run:1","inputs":{"query":"wildfire risk models for California","top_k":20,"rerank_k":8}}'
+```
+
 ## IPT profile (bblock: `ogc.osc.api-profiles.processes.ipt.api`)
 
 Requests to `/processes/{id}/execution` MUST include:
