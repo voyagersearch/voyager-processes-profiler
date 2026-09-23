@@ -18,10 +18,24 @@
  * ops-controlled and orthogonal to whether D120 successfully served the caller.
  */
 
+import { VOYAGER_ACTIVITY_NS } from "voyager-prov-ts";
+
 import type { Config } from "../config.js";
 import type { NormalisedIptRequest } from "./emit.js";
 import { putSidecar } from "./sink.js";
 import type { StoredProvActivity } from "./store.js";
+
+/**
+ * Compose the canonical prov_activityType URI. Matches the D100 convention
+ * (voyager-prov-ts's `activityTypeURI` — but voyager-prov-ts only accepts
+ * the 12 D100 enum values, and D120 has extras like `rank` and
+ * `rag-workflow` outside that enum, so we compose the URI directly).
+ * Facet-grouping in Solr `main` uses this URI, so all D120 emissions land
+ * in the same facet bucket as their D100 siblings.
+ */
+function activityTypeUri(processId: string): string {
+  return `${VOYAGER_ACTIVITY_NS}${processId}`;
+}
 
 interface SolrProvDoc {
   id: string;
@@ -72,7 +86,7 @@ function buildSolrProvDoc(
     },
     "@id": req.activity_id,
     "@type": "prov:Activity",
-    "prov:type": { "@id": `voyager:${req.process_id}` },
+    "prov:type": { "@id": activityTypeUri(req.process_id) },
     "prov:wasAssociatedWith": { "@id": req.agent_id },
     "prov:used": used.map((u) => ({ "@id": u })),
     "prov:generated": [{ "@id": req.result_id }],
@@ -89,7 +103,7 @@ function buildSolrProvDoc(
   return {
     id: stored.uuid,
     prov_id: req.activity_id,
-    prov_activityType: req.process_id,
+    prov_activityType: activityTypeUri(req.process_id),
     prov_agent: req.agent_id,
     prov_used: used,
     prov_generated: [req.result_id],

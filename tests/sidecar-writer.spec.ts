@@ -44,7 +44,7 @@ describe("buildSolrProvDoc", () => {
     const doc = _testables.buildSolrProvDoc(makeReq(), makeStored(), endedAt);
     expect(doc.id).toBe("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
     expect(doc.prov_id).toBe("urn:client:run:xyz");
-    expect(doc.prov_activityType).toBe("retrieve");
+    expect(doc.prov_activityType).toBe("https://voyager.ogc/prov/activity/retrieve");
     expect(doc.prov_agent).toBe("urn:client:agent:xyz");
     expect(doc.prov_generated).toEqual(["urn:client:result:xyz"]);
     expect(doc.prov_startedAt).toBe(startedAt);
@@ -78,6 +78,7 @@ describe("buildSolrProvDoc", () => {
     const jsonld = JSON.parse(doc.prov_jsonld);
     expect(jsonld["@type"]).toBe("prov:Activity");
     expect(jsonld["@id"]).toBe("urn:client:run:xyz");
+    expect(jsonld["prov:type"]["@id"]).toBe("https://voyager.ogc/prov/activity/retrieve");
     expect(jsonld["prov:wasAssociatedWith"]).toEqual({ "@id": "urn:client:agent:xyz" });
     expect(jsonld["prov:generated"]).toEqual([{ "@id": "urn:client:result:xyz" }]);
     expect(jsonld["prov:startedAtTime"]["@value"]).toBe(startedAt);
