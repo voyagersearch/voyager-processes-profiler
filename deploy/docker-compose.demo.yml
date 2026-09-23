@@ -1,0 +1,45 @@
+# Demo-EC2 compose. Joins the voyager-rag-demo_default docker network so we
+# can reach the RAG service via its container hostname `rag` (RAG doesn't
+# publish 4500 on the host — service-mesh access only).
+#
+# Run from this directory:
+#   docker compose --env-file processes.env -f docker-compose.demo.yml up -d --build
+#
+# Assumes the voyager-rag-demo stack is already up (voyager-mastra-full-rag's
+# docker-compose.demo.yml running).
+
+name: voyager-processes-profiler-demo
+
+services:
+  processes:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      additional_contexts:
+        prov: ../../voyager-prov-ts
+    image: voyager-processes-profiler:0.2.0
+    container_name: voyager-processes-profiler
+    restart: unless-stopped
+    ports:
+      - "4601:4601"
+    env_file:
+      - ./processes.env
+    networks:
+      # Default network gives the container its own bridge; rag-demo joins the
+      # existing voyager-rag-demo stack so `rag:4500` resolves.
+      - default
+      - rag-demo
+    extra_hosts:
+      # HQ still runs on the docker host (not in the rag-demo stack) so we
+      # keep the host-gateway extra_host for HQ_BASE_URL=http://host.docker.internal:4000.
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4601/"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+
+networks:
+  rag-demo:
+    external: true
+    name: voyager-rag-demo_default
