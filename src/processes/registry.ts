@@ -59,14 +59,53 @@ export function getEnabledProcesses(): ProcessMeta[] {
     .filter((m): m is ProcessMeta => Boolean(m));
 }
 
-export function getProcessDescription(id: string, cfg: Config): (ProcessMeta & { links: unknown[] }) | null {
+/**
+ * Bblock identifiers this D120 conforms to for every process. Advertised in
+ * each process description so an LLM caller or a validating client can pull
+ * the actual schema shapes from OSC without us having to inline them here.
+ * See docs/D110-INTEGRATION.md for the full profile chain.
+ */
+const COMMON_CONFORMS_TO = [
+  "ogc.api.processes.v1",
+  "ogc.osc.api-profiles.processes.ipt.api",
+  "ogc.osc.api-profiles.processes.ipt.execute",
+  "ogc.osc.api-profiles.processes.ipt.results",
+];
+// Additional bblocks that the composite workflow process conforms to on top.
+const WORKFLOW_CONFORMS_TO = ["ogc.osc.api-profiles.processes.workflow"];
+
+function conformsToFor(id: string): string[] {
+  if (id === "rag-workflow") return [...COMMON_CONFORMS_TO, ...WORKFLOW_CONFORMS_TO];
+  return COMMON_CONFORMS_TO;
+}
+
+export interface ProcessDescription extends ProcessMeta {
+  links: unknown[];
+  "voy:conformsTo": Array<{ "@id": string; "voy:bblockId": string }>;
+}
+
+export function getProcessDescription(id: string, cfg: Config): ProcessDescription | null {
   const meta = META[id];
   if (!meta) return null;
   return {
     ...meta,
+    // Discoverability: each conformsTo id is resolvable at
+    // https://ogcincubator.github.io/bblocks-openscience/bblock/<id>
+    // — clients that speak bblocks can validate our responses against these
+    // without pulling the schemas from us.
+    "voy:conformsTo": conformsToFor(id).map((bblockId) => ({
+      "@id": `https://ogcincubator.github.io/bblocks-openscience/bblock/${bblockId}`,
+      "voy:bblockId": bblockId,
+    })),
     links: [
       { href: `${cfg.publicBaseUrl}/processes/${id}`, rel: "self", type: "application/json" },
       { href: `${cfg.publicBaseUrl}/processes/${id}/execution`, rel: "http://www.opengis.net/def/rel/ogc/1.0/execute", type: "application/json" },
+      ...conformsToFor(id).map((bblockId) => ({
+        href: `https://ogcincubator.github.io/bblocks-openscience/bblock/${bblockId}`,
+        rel: "http://www.opengis.net/def/rel/ogc/1.0/conformance",
+        type: "text/html",
+        title: `Bblock: ${bblockId}`,
+      })),
       ...(cfg.registerBaseUrl
         ? [{ href: `${cfg.registerBaseUrl}/activities/${id}`, rel: "http://www.opengis.net/def/rel/ogc/1.0/definition", type: "application/json" }]
         : []),
