@@ -18,9 +18,15 @@
  *    suffix so a client can predict them.
  */
 
+import { randomUUID } from "node:crypto";
+
 import type { Config } from "../config.js";
 import type { NormalisedIptRequest } from "../prov/emit.js";
-import { emitSidecarInBackground } from "../prov/sidecar-writer.js";
+import {
+  emitBundleSidecarInBackground,
+  emitSidecarInBackground,
+  type BundleMember,
+} from "../prov/sidecar-writer.js";
 import { wrapWithProvenance } from "../prov/emit.js";
 import { generateHandler } from "./generate.js";
 import { rankHandler } from "./rank.js";
@@ -76,15 +82,16 @@ export const workflowProcessMeta: ProcessMeta = {
       schema: { type: "array", items: { type: "object" } },
     },
     chain_provenance: {
-      title: "Child activity IRIs",
+      title: "Child activity IRIs + Bundle IRI",
       description:
-        "Ordered list of the retrieve/rank/generate activity IRIs the composite delegated to. Each resolves via /prov/activity/{uuid} on this service (if v0.2 sidecar is enabled) and via the register's Solr on HQ.",
+        "IRIs the composite delegated to. `retrieve`/`rank`/`generate` name the individual sub-activities (each resolves via /prov/activity/{uuid} and via the register's Solr). `bundle` names the prov:Bundle sidecar (JSON-LD named graph) that wraps all three as one addressable trace — see bblocks-prov-jsonld-alt's Bundle rationale.",
       schema: {
         type: "object",
         properties: {
           retrieve: { type: "string" },
           rank: { type: "string" },
           generate: { type: "string" },
+          bundle: { type: "string" },
         },
       },
     },
@@ -123,13 +130,26 @@ function childRequest(
   };
 }
 
+/** Extract IRI-shaped input values so we can aggregate a Bundle's prov:used union. */
+function iriInputs(inputs: Record<string, unknown>): string[] {
+  const out: string[] = [];
+  for (const v of Object.values(inputs)) {
+    if (typeof v === "string" && /^(https?:|urn:)/i.test(v)) out.push(v);
+  }
+  return out;
+}
+
 async function runChild(
   parent: NormalisedIptRequest,
   cfg: Config,
   step: "retrieve" | "rank" | "generate",
   handler: (r: NormalisedIptRequest, c: Config) => Promise<Record<string, unknown>>,
   inputs: Record<string, unknown>
-): Promise<{ outputs: Record<string, unknown>; activity_id: string }> {
+): Promise<{
+  outputs: Record<string, unknown>;
+  activity_id: string;
+  bundleMember: BundleMember;
+}> {
   const child = childRequest(parent, step, inputs);
   const outputs = await handler(child, cfg);
   // Wrap + emit sidecar so each sub-step is discoverable in Solr the same
@@ -139,7 +159,18 @@ async function runChild(
     publicBaseUrl: cfg.publicBaseUrl,
   });
   emitSidecarInBackground(cfg, child, wrap.stored, wrap.endedAt);
-  return { outputs: wrap.outputs, activity_id: child.activity_id };
+  // Also collect a BundleMember record so the composite can wrap all children
+  // into one prov:Bundle sidecar after they all complete.
+  const bundleMember: BundleMember = {
+    block: (wrap.outputs.provenance as Record<string, unknown>) ?? {},
+    activityIri: child.activity_id,
+    agentIri: child.agent_id,
+    resultIri: child.result_id,
+    usedIris: iriInputs(inputs),
+    startedAt: child.started_at,
+    endedAt: wrap.endedAt,
+  };
+  return { outputs: wrap.outputs, activity_id: child.activity_id, bundleMember };
 }
 
 export async function workflowHandler(
@@ -178,6 +209,22 @@ export async function workflowHandler(
     // real CWL executor in v0.3.
   });
 
+  // Emit ONE prov:Bundle sidecar wrapping all 3 child activities as a
+  // named-graph aggregate. The composite's own parent activity sidecar is
+  // still written separately by the execution route (as any real-execute
+  // process is), so the Bundle is additive — one addressable trace URI
+  // atop the granular per-activity records.
+  const bundleUuid = randomUUID();
+  const bundleIri = `${req.activity_id}#bundle`;
+  emitBundleSidecarInBackground(
+    cfg,
+    bundleUuid,
+    bundleIri,
+    req,
+    new Date().toISOString(),
+    [retrieved.bundleMember, ranked.bundleMember, generated.bundleMember]
+  );
+
   return {
     answer: generated.outputs.answer ?? "",
     candidates,
@@ -186,6 +233,7 @@ export async function workflowHandler(
       retrieve: retrieved.activity_id,
       rank: ranked.activity_id,
       generate: generated.activity_id,
+      bundle: bundleIri,
     },
     workflow: {
       // CWL-shape listing (informational — not a live CWL document)

@@ -39,6 +39,49 @@ function makeStored(): StoredProvActivity {
   };
 }
 
+describe("buildBundleSolrProvDoc", () => {
+  const member = (id: string, agent: string, used: string[], result: string) => ({
+    block: { "@id": id, "@type": "prov:Activity" },
+    activityIri: id,
+    agentIri: agent,
+    resultIri: result,
+    usedIris: used,
+    startedAt: startedAt,
+    endedAt: endedAt,
+  });
+
+  it("wraps members into a prov:Bundle JSON-LD with @graph + assertion metadata", () => {
+    const compositeReq = makeReq({ process_id: "rag-workflow" });
+    const doc = _testables.buildBundleSolrProvDoc(
+      "bundle-uuid",
+      "urn:client:run:1#bundle",
+      compositeReq,
+      endedAt,
+      [
+        member("urn:client:run:1#step=retrieve", "urn:a1", [], "urn:r1"),
+        member("urn:client:run:1#step=rank", "urn:a1", ["urn:r1"], "urn:r2"),
+        member("urn:client:run:1#step=generate", "urn:a1", ["urn:r2"], "urn:r3"),
+      ]
+    );
+    expect(doc.id).toBe("bundle-uuid");
+    expect(doc.prov_id).toBe("urn:client:run:1#bundle");
+    expect(doc.prov_activityType).toBe("https://voyager.ogc/prov/activity/rag-workflow");
+    // Bundle-level prov:used is the union of member usedIris; prov:generated
+    // is the union of member resultIris. Deduped.
+    expect(doc.prov_used.sort()).toEqual(["urn:r1", "urn:r2"]);
+    expect(doc.prov_generated.sort()).toEqual(["urn:r1", "urn:r2", "urn:r3"]);
+    const jsonld = JSON.parse(doc.prov_jsonld);
+    expect(jsonld["@type"]).toBe("prov:Bundle");
+    expect(jsonld["@id"]).toBe("urn:client:run:1#bundle");
+    expect(jsonld["prov:wasAttributedTo"]["@id"]).toBe("urn:client:agent:xyz");
+    expect(Array.isArray(jsonld["@graph"])).toBe(true);
+    expect(jsonld["@graph"]).toHaveLength(3);
+    expect(jsonld.extra.d120_bundle_uuid).toBe("bundle-uuid");
+    expect(jsonld.extra.d120_composite_process_id).toBe("rag-workflow");
+    expect(jsonld.extra.d120_member_count).toBe(3);
+  });
+});
+
 describe("buildSolrProvDoc", () => {
   it("maps IPT IRIs onto SolrProvDoc fields verbatim", () => {
     const doc = _testables.buildSolrProvDoc(makeReq(), makeStored(), endedAt);

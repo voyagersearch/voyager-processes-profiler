@@ -119,6 +119,126 @@ export function emitSidecarInBackground(
   });
 }
 
+/**
+ * Compose a Bundle sidecar for a composite process (rag-workflow today).
+ *
+ * A `prov:Bundle` is PROV's named-provenance-subgraph concept: itself an
+ * Entity, so it can carry its own assertion metadata (who asserted, when),
+ * and it holds a set of `prov:Activity` / `prov:Entity` statements as members
+ * via JSON-LD's named-graph form (@graph). See bblocks-prov-jsonld-alt's
+ * README for the design rationale — it's the "unclaimed territory" both
+ * OSC PROV bblocks flagged.
+ *
+ * D120 emits Bundle sidecars ALONGSIDE the individual per-activity sidecars
+ * (not instead of), so existing Solr queries like
+ *   q=prov_activityType:"https://voyager.ogc/prov/activity/retrieve"
+ * still find each retrieve step; the Bundle adds one addressable trace URI
+ * that names the whole composite in one document.
+ *
+ * The Bundle's own prov_activityType is the composite's own type URI
+ * (rag-workflow), so it groups in the same Solr facet bucket as the
+ * composite's parent activity sidecar.
+ */
+export interface BundleMember {
+  /** Full prov:Activity JSON-LD block as already built by wrapWithProvenance. */
+  block: Record<string, unknown>;
+  /** Activity IRI (echoed for prov_used / prov_generated aggregation). */
+  activityIri: string;
+  /** Agent IRI (union across members goes onto the Bundle's provenance). */
+  agentIri: string;
+  /** Result IRI (contributes to Bundle-level prov_generated). */
+  resultIri: string;
+  /** Input IRIs (contributes to Bundle-level prov_used). */
+  usedIris: string[];
+  /** Timestamps for narrowing the Bundle's span. */
+  startedAt: string;
+  endedAt: string;
+}
+
+function buildBundleSolrProvDoc(
+  bundleUuid: string,
+  bundleIri: string,
+  compositeReq: NormalisedIptRequest,
+  compositeEndedAt: string,
+  members: BundleMember[]
+): SolrProvDoc {
+  // Bundle assertion metadata: whoever ran the composite (the composite's
+  // own agent) asserted the bundle.
+  const asserter = compositeReq.agent_id;
+  const startedAt = members.reduce(
+    (min, m) => (m.startedAt < min ? m.startedAt : min),
+    compositeReq.started_at
+  );
+  const endedAt = members.reduce(
+    (max, m) => (m.endedAt > max ? m.endedAt : max),
+    compositeEndedAt
+  );
+
+  // Union of input/output IRIs across members. Deduped.
+  const usedSet = new Set<string>();
+  const generatedSet = new Set<string>();
+  for (const m of members) {
+    for (const u of m.usedIris) usedSet.add(u);
+    generatedSet.add(m.resultIri);
+  }
+
+  const jsonld = {
+    "@context": {
+      prov: "http://www.w3.org/ns/prov#",
+      xsd: "http://www.w3.org/2001/XMLSchema#",
+    },
+    "@id": bundleIri,
+    "@type": "prov:Bundle",
+    "prov:generatedAtTime": { "@value": endedAt, "@type": "xsd:dateTime" },
+    "prov:wasAttributedTo": { "@id": asserter },
+    "@graph": members.map((m) => m.block),
+    extra: {
+      d120_bundle_uuid: bundleUuid,
+      d120_composite_process_id: compositeReq.process_id,
+      d120_member_count: members.length,
+    },
+  };
+
+  return {
+    id: bundleUuid,
+    prov_id: bundleIri,
+    // Group under the composite's activity type so Solr facet on
+    // prov_activityType finds the Bundle alongside its parent activity.
+    prov_activityType: activityTypeUri(compositeReq.process_id),
+    prov_agent: asserter,
+    prov_used: [...usedSet],
+    prov_generated: [...generatedSet],
+    prov_startedAt: startedAt,
+    prov_endedAt: endedAt,
+    prov_jsonld: JSON.stringify(jsonld),
+  };
+}
+
+export function emitBundleSidecarInBackground(
+  cfg: Config,
+  bundleUuid: string,
+  bundleIri: string,
+  compositeReq: NormalisedIptRequest,
+  compositeEndedAt: string,
+  members: BundleMember[]
+): void {
+  if (!cfg.hq.baseUrl) return;
+  if (members.length === 0) return;
+  const doc = buildBundleSolrProvDoc(
+    bundleUuid,
+    bundleIri,
+    compositeReq,
+    compositeEndedAt,
+    members
+  );
+  void putSidecar(cfg, bundleUuid, doc as unknown as Record<string, unknown>).catch((err) => {
+    console.error(
+      `[sidecar-writer] failed to write bundle ${bundleUuid} for composite ${bundleIri}:`,
+      err
+    );
+  });
+}
+
 // Exported for the Phase 2 unit test — lets us assert the SolrProvDoc shape
 // without needing HQ or the network.
-export const _testables = { buildSolrProvDoc };
+export const _testables = { buildSolrProvDoc, buildBundleSolrProvDoc };

@@ -112,6 +112,8 @@ describe("workflowHandler — full chain over stubbed HQ + RAG", () => {
     expect(chain.retrieve).toContain("#step=retrieve");
     expect(chain.rank).toContain("#step=rank");
     expect(chain.generate).toContain("#step=generate");
+    // Bundle IRI names the prov:Bundle sidecar that wraps all three
+    expect(chain.bundle).toContain("#bundle");
 
     const workflow = result.workflow as { class: string; steps: Record<string, unknown> };
     expect(workflow.class).toBe("Workflow");
