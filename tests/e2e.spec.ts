@@ -74,19 +74,40 @@ describe("HTTP surface", () => {
     );
   });
 
-  it("GET /processes/{id} returns a process description with self + execute links", async () => {
+  it("GET /processes/{id} returns a process description with self + execute + conformance links + conformsTo", async () => {
     const res = await makeApp().fetch(new Request("http://localhost/processes/retrieve"));
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
       id: string;
       inputs: Record<string, unknown>;
-      links: Array<{ rel: string }>;
+      links: Array<{ rel: string; href: string }>;
+      "voy:conformsTo": Array<{ "@id": string; "voy:bblockId": string }>;
     };
     expect(body.id).toBe("retrieve");
     expect(body.inputs.query).toBeDefined();
     const rels = body.links.map((l) => l.rel);
     expect(rels).toContain("self");
     expect(rels.some((r) => r.includes("execute"))).toBe(true);
+    // conformance links per OGC pattern
+    expect(rels.some((r) => r.includes("conformance"))).toBe(true);
+    // machine-readable voy:conformsTo mirroring the same bblock ids
+    const bblocks = body["voy:conformsTo"].map((c) => c["voy:bblockId"]);
+    expect(bblocks).toContain("ogc.api.processes.v1");
+    expect(bblocks).toContain("ogc.osc.api-profiles.processes.ipt.api");
+    expect(bblocks).toContain("ogc.osc.api-profiles.processes.ipt.execute");
+    expect(bblocks).toContain("ogc.osc.api-profiles.processes.ipt.results");
+    // retrieve is not a workflow composite
+    expect(bblocks).not.toContain("ogc.osc.api-profiles.processes.workflow");
+  });
+
+  it("GET /processes/rag-workflow additionally declares the workflow bblock", async () => {
+    const res = await makeApp().fetch(new Request("http://localhost/processes/rag-workflow"));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      "voy:conformsTo": Array<{ "voy:bblockId": string }>;
+    };
+    const bblocks = body["voy:conformsTo"].map((c) => c["voy:bblockId"]);
+    expect(bblocks).toContain("ogc.osc.api-profiles.processes.workflow");
   });
 
   it("GET /processes/nope returns 404", async () => {
